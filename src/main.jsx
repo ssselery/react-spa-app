@@ -7,7 +7,7 @@ import "./styles/index.scss";
 
 createRoot(document.getElementById("root")).render(
 	<StrictMode>
-		<BrowserRouter>
+		<BrowserRouter basename="/react-spa-app/">
 			<App />
 		</BrowserRouter>
 	</StrictMode>
