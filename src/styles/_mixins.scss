@@ -1,8 +1,10 @@
+@use './variables' as var;
+
 @mixin card {
-	background: $color-surface;
+	background: var.$color-bg-surface;
 	padding: 20px;
-	border-radius: $radius-md;
-	box-shadow: $shadow-sm;
+	border-radius: var.$radius-md;
+	box-shadow: var.$shadow-sm;
 }
 
 @mixin flex-center {

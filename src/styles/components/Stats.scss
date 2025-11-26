@@ -1,0 +1,115 @@
+@use "../variables" as var;
+
+.stats-page {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.stats-card {
+	width: 100%;
+	max-width: 700px;
+	background: var.$color-bg-surface;
+	border-radius: var.$radius-lg;
+	box-shadow: var.$shadow-soft;
+	padding: 26px 30px;
+	display: flex;
+	flex-direction: column;
+	gap: 22px;
+}
+
+.stats-card__header {
+	display: flex;
+	justify-content: space-between;
+	gap: 20px;
+}
+
+.stats-card__label {
+	color: var.$color-muted;
+	font-size: 0.9rem;
+}
+
+.stats-card__value {
+	font-size: 1.6rem;
+	font-weight: 700;
+	color: var.$color-primary-dark;
+}
+
+.stats-card__value--accent {
+	color: #2f7b32;
+}
+
+.stats-progress {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.stats-progress__label {
+	font-weight: 600;
+	color: var.$color-primary-dark;
+}
+
+.stats-progress__bar {
+	width: 100%;
+	height: 10px;
+	border-radius: 999px;
+	background: #efe7dd;
+	overflow: hidden;
+}
+
+.stats-progress__fill {
+	height: 100%;
+	border-radius: inherit;
+	background: linear-gradient(90deg, #66bb6a, #43a047);
+	transition: width 0.25s ease;
+}
+
+.stats-graph {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.stats-graph__item {
+	display: grid;
+	grid-template-columns: 140px 1fr 40px;
+	align-items: center;
+	gap: 10px;
+}
+
+.stats-graph__title {
+	font-weight: 600;
+	color: var.$color-primary-dark;
+}
+
+.stats-graph__bar {
+	height: 8px;
+	background: #f1ebe4;
+	border-radius: 999px;
+	overflow: hidden;
+}
+
+.stats-graph__bar-fill {
+	height: 100%;
+	border-radius: inherit;
+	transition: width 0.25s ease;
+}
+
+.stats-graph__bar-fill--not {
+	background: #d7ccc8;
+}
+
+.stats-graph__bar-fill--progress {
+	background: #ffb74d;
+}
+
+.stats-graph__bar-fill--done {
+	background: #81c784;
+}
+
+.stats-graph__count {
+	text-align: right;
+	font-weight: 600;
+	color: var.$color-text;
+}
