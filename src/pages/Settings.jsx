@@ -1,79 +1,101 @@
+import { useNavigate } from "react-router-dom";
 import "../styles/components/Settings.scss";
-import "../styles/components/PageLayout.scss";
 import { useAuth } from "../context/AuthContext";
+import useTechnologies from "../hooks/useTechnologies";
 
 function Settings() {
-	const { logout } = useAuth();
+	const navigate = useNavigate();
+	const { user, logout } = useAuth();
+	const {
+		clearTechnologiesForCurrentUser,
+		resetToDefaultsForCurrentUser,
+	} = useTechnologies();
 	
-	const clearTechnologies = () => {
-		if (!confirm("Удалить все технологии и заметки для всех пользователей?")) return;
+	const handleClearTechnologiesCurrent = () => {
+		if (!window.confirm("Удалить все технологии текущего пользователя?")) return;
+		clearTechnologiesForCurrentUser();
+	};
+	
+	const handleResetDefaults = () => {
+		if (!window.confirm("Вернуть список технологий к значениям по умолчанию?")) return;
+		resetToDefaultsForCurrentUser();
+	};
+	
+	const handleClearUser = () => {
+		if (!window.confirm("Выйти и удалить данные текущего пользователя?")) return;
 		
-		Object.keys(localStorage).forEach((key) => {
-			if (key.startsWith("technologies_") || key === "technologies_guest") {
-				localStorage.removeItem(key);
+		if (user && user.username) {
+			window.localStorage.removeItem("user");
+		}
+		
+		logout();
+		navigate("/");
+	};
+	
+	const handleClearAll = () => {
+		if (
+			!window.confirm(
+				"Полностью сбросить приложение и очистить технологии для всех пользователей в этом браузере?"
+			)
+		) {
+			return;
+		}
+		
+		Object.keys(window.localStorage).forEach((key) => {
+			if (key.startsWith("technologies_")) {
+				window.localStorage.setItem(key, JSON.stringify([]));
+			}
+			if (key === "user") {
+				window.localStorage.removeItem(key);
 			}
 		});
 		
-		location.reload();
-	};
-	
-	const clearUser = () => {
-		if (!confirm("Выйти и удалить текущего пользователя?")) return;
-		localStorage.removeItem("user");
-		logout?.();
-		location.reload();
-	};
-	
-	const clearAll = () => {
-		if (!confirm("Полностью сбросить приложение (все пользователи и технологии)?")) return;
-		
-		Object.keys(localStorage).forEach((key) => {
-			if (key.startsWith("technologies_") || key === "technologies_guest") {
-				localStorage.removeItem(key);
-			}
-		});
-		
-		localStorage.removeItem("user");
-		location.reload();
+		logout();
+		navigate("/");
 	};
 	
 	return (
 		<section className="page settings-page">
 			<h1 className="page-title">Настройки</h1>
+			<p className="page-subtitle">
+				Управляйте данными технологий и учетной записи. Все изменения применяются
+				только в этом браузере.
+			</p>
 			
 			<div className="settings-card">
-				<p className="settings-desc">
-					Здесь вы можете управлять данными приложения: очищать список технологий
-					и данные пользователя.
-				</p>
-				
 				<div className="settings-group">
-					<h2 className="settings-group__title">Данные технологий</h2>
+					<h2>Текущий пользователь</h2>
 					<button
 						className="settings-btn settings-btn--warning"
-						onClick={clearTechnologies}
+						onClick={handleClearTechnologiesCurrent}
 					>
-						Очистить все технологии (для всех)
+						Очистить технологии текущего пользователя
+					</button>
+					<button
+						className="settings-btn"
+						onClick={handleResetDefaults}
+					>
+						Сбросить список технологий к значениям по умолчанию
 					</button>
 				</div>
 				
 				<div className="settings-group">
-					<h2 className="settings-group__title">Пользователь</h2>
+					<h2>Аккаунт</h2>
 					<button
-						className="settings-btn settings-btn--primary"
-						onClick={clearUser}
+						className="settings-btn"
+						onClick={handleClearUser}
 					>
 						Выйти и удалить пользователя
 					</button>
 				</div>
 				
 				<div className="settings-group">
-					<h2 className="settings-group__title">Полный сброс</h2>
+					<h2>Полный сброс</h2>
 					<button
 						className="settings-btn settings-btn--danger"
-						onClick={clearAll}
+						onClick={handleClearAll}
 					>
-						Сбросить приложение полностью
+						Очистить технологии для всех и сбросить приложение
 					</button>
 				</div>
 			</div>

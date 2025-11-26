@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import useLocalStorage from "./useLocalStorage";
 import { useAuth } from "../context/AuthContext";
 
@@ -18,7 +18,7 @@ const defaultTechnologies = [
 		title: "JavaScript",
 		description: "Язык программирования для веба",
 		category: "language",
-		status: "in-progress",
+		status: "not-started",
 		source: "",
 		notes: "",
 		createdAt: "2025-01-02",
@@ -45,9 +45,18 @@ function useTechnologies() {
 	
 	const [techList, setTechList] = useLocalStorage(storageKey, defaultTechnologies);
 	
+	useEffect(() => {
+		if (!user && (!techList || techList.length === 0)) {
+			setTechList(defaultTechnologies);
+		}
+	}, [user, techList, setTechList]);
+	
 	const addTechnology = (techData) => {
 		const newTech = {
-			id: Date.now(),
+			id:
+				techList.length > 0
+					? Math.max(...techList.map((t) => Number(t.id) || 0)) + 1
+					: 1,
 			title: techData.title,
 			description: techData.description || "",
 			category: techData.category || "",

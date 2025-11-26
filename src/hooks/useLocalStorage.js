@@ -26,6 +26,27 @@ function useLocalStorage(key, initialValue) {
 		}
 	}, [key, value]);
 	
+	useEffect(() => {
+		try {
+			const stored = window.localStorage.getItem(key);
+			if (stored !== null) {
+				setValue(JSON.parse(stored));
+			} else {
+				if (typeof initialValue === "function") {
+					setValue(initialValue());
+				} else {
+					setValue(initialValue);
+				}
+			}
+		} catch {
+			if (typeof initialValue === "function") {
+				setValue(initialValue());
+			} else {
+				setValue(initialValue);
+			}
+		}
+	}, [key]);
+	
 	return [value, setValue];
 }
 
