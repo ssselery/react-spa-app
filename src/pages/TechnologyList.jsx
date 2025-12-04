@@ -2,6 +2,7 @@ import { useState } from "react";
 import SearchDebounced from "../components/SearchDebounced";
 import useTechnologies from "../hooks/useTechnologies";
 import TechnologyCard from "../components/TechnologyCard";
+import ApiTechnologySearch from "../components/ApiTechnologySearch";
 
 import "../styles/components/PageLayout.scss";
 import "../styles/components/TechnologyList.scss";
@@ -10,18 +11,19 @@ function TechnologyList() {
 	const { techList } = useTechnologies();
 	const [query, setQuery] = useState("");
 	
-	const filtered = techList.filter((t) =>
-		t.title.toLowerCase().includes(query) ||
-		t.description.toLowerCase().includes(query) ||
-		t.category.toLowerCase().includes(query)
-	);
+	const filtered = techList.filter((t) => {
+		const title = (t.title || "").toLowerCase();
+		const desc = (t.description || "").toLowerCase();
+		const cat = (t.category || "").toLowerCase();
+		const q = query.toLowerCase();
+		return title.includes(q) || desc.includes(q) || cat.includes(q);
+	});
 	
 	return (
 		<section className="page tech-list-page">
 			<h1 className="page-title">Технологии</h1>
 			<p className="page-subtitle">
-				Здесь собраны все технологии, которые вы добавили в свой трекер.
-				Используйте поиск, чтобы быстро найти нужную.
+				Ваши сохранённые технологии и библиотека из внешнего API.
 			</p>
 			
 			<div className="search-wrapper">
@@ -37,6 +39,8 @@ function TechnologyList() {
 					))
 				)}
 			</div>
+			
+			<ApiTechnologySearch />
 		</section>
 	);
 }

@@ -26,7 +26,7 @@ function AddTechnology() {
 	const [status, setStatus] = useState("not-started");
 	
 	const [importUrl, setImportUrl] = useState(
-		"https://api.example.com/roadmaps/frontend"
+		"https://raw.githubusercontent.com/ssselery/react-spa-app/ApiTest/roadmap-frontend.json"
 	);
 	const [importing, setImporting] = useState(false);
 	const [importMessage, setImportMessage] = useState("");
@@ -74,9 +74,15 @@ function AddTechnology() {
 				);
 			}
 			
-			const roadmapData = await response.json();
+			const data = await response.json();
 			
-			if (!roadmapData || !Array.isArray(roadmapData.technologies)) {
+			const technologiesArray = Array.isArray(data)
+				? data
+				: Array.isArray(data.technologies)
+					? data.technologies
+					: null;
+			
+			if (!technologiesArray) {
 				throw new Error("Некорректный формат данных дорожной карты");
 			}
 			
@@ -87,7 +93,7 @@ function AddTechnology() {
 			
 			let addedCount = 0;
 			
-			for (const tech of roadmapData.technologies) {
+			for (const tech of technologiesArray) {
 				await addTechnologyViaApi(tech);
 				
 				currentMaxId += 1;
@@ -109,7 +115,6 @@ function AddTechnology() {
 			
 			setImportMessage(`Успешно импортировано ${addedCount} технологий`);
 		} catch (err) {
-			console.error(err);
 			setImportMessage(`Ошибка импорта: ${err.message}`);
 		} finally {
 			setImporting(false);
@@ -198,7 +203,7 @@ function AddTechnology() {
 								type="text"
 								value={importUrl}
 								onChange={(e) => setImportUrl(e.target.value)}
-								placeholder="https://api.example.com/roadmaps/frontend"
+								placeholder="https://..."
 							/>
 						</div>
 						

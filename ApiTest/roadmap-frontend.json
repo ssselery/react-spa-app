@@ -1,0 +1,40 @@
+{
+	"technologies": [
+		{
+			"title": "HTML & семантика",
+			"description": "Базовая разметка, семантические теги, структура документов.",
+			"category": "frontend",
+			"resources": [
+				"https://developer.mozilla.org/en-US/docs/Web/HTML",
+				"https://html.spec.whatwg.org/"
+			]
+		},
+		{
+			"title": "CSS и Flexbox/Grid",
+			"description": "Современная верстка, адаптивность, layout-системы.",
+			"category": "frontend",
+			"resources": [
+				"https://developer.mozilla.org/en-US/docs/Web/CSS",
+				"https://css-tricks.com/snippets/css/a-guide-to-flexbox/"
+			]
+		},
+		{
+			"title": "JavaScript базовый",
+			"description": "Типы данных, функции, DOM, события.",
+			"category": "language",
+			"resources": [
+				"https://developer.mozilla.org/en-US/docs/Web/JavaScript",
+				"https://javascript.info/"
+			]
+		},
+		{
+			"title": "React основы",
+			"description": "Компоненты, props, состояние, хуки.",
+			"category": "frontend",
+			"resources": [
+				"https://react.dev/learn",
+				"https://beta.reactjs.org/"
+			]
+		}
+	]
+}
