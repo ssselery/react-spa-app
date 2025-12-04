@@ -26,7 +26,7 @@ function AddTechnology() {
 	const [status, setStatus] = useState("not-started");
 	
 	const [importUrl, setImportUrl] = useState(
-		"https://raw.githubusercontent.com/ssselery/react-spa-app/ApiTest/roadmap-frontend.json"
+		"https://raw.githubusercontent.com/ssselery/react-spa-app/refs/heads/main/ApiTest/roadmap-frontend.json"
 	);
 	const [importing, setImporting] = useState(false);
 	const [importMessage, setImportMessage] = useState("");
