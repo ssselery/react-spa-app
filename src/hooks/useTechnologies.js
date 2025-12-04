@@ -52,11 +52,15 @@ function useTechnologies() {
 	}, [user, techList, setTechList]);
 	
 	const addTechnology = (techData) => {
-		const newTech = {
-			id:
-				techList.length > 0
+		const nextId =
+			techData.id != null
+				? Number(techData.id)
+				: techList.length > 0
 					? Math.max(...techList.map((t) => Number(t.id) || 0)) + 1
-					: 1,
+					: 1;
+		
+		const newTech = {
+			id: nextId,
 			title: techData.title,
 			description: techData.description || "",
 			category: techData.category || "",
@@ -69,6 +73,7 @@ function useTechnologies() {
 		setTechList((prev) => [...prev, newTech]);
 		return newTech;
 	};
+
 	
 	const updateStatus = (id, newStatus) => {
 		setTechList((prev) =>

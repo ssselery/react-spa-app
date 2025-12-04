@@ -1,46 +1,48 @@
 import { useState } from "react";
-import SearchDebounced from "../components/SearchDebounced";
 import useTechnologies from "../hooks/useTechnologies";
 import TechnologyCard from "../components/TechnologyCard";
-import ApiTechnologySearch from "../components/ApiTechnologySearch";
-
-import "../styles/components/PageLayout.scss";
+import SearchDebounced from "../components/SearchDebounced";
+import RemoteApiSearch from "../components/RemoteApiSearch";
 import "../styles/components/TechnologyList.scss";
 
 function TechnologyList() {
-	const { techList } = useTechnologies();
+	const { techList, addTechnology } = useTechnologies();
 	const [query, setQuery] = useState("");
+	
+	const lowerQuery = query.toLowerCase();
 	
 	const filtered = techList.filter((t) => {
 		const title = (t.title || "").toLowerCase();
 		const desc = (t.description || "").toLowerCase();
-		const cat = (t.category || "").toLowerCase();
-		const q = query.toLowerCase();
-		return title.includes(q) || desc.includes(q) || cat.includes(q);
+		const category = (t.category || "").toLowerCase();
+		
+		return (
+			title.includes(lowerQuery) ||
+			desc.includes(lowerQuery) ||
+			category.includes(lowerQuery)
+		);
 	});
 	
 	return (
-		<section className="page tech-list-page">
+		<section className="tech-list-page">
 			<h1 className="page-title">Технологии</h1>
-			<p className="page-subtitle">
-				Ваши сохранённые технологии и библиотека из внешнего API.
-			</p>
 			
-			<div className="search-wrapper">
-				<SearchDebounced onSearch={setQuery} />
-			</div>
+			<SearchDebounced onSearch={setQuery} />
 			
 			<div className="tech-list">
 				{filtered.length === 0 ? (
 					<p>Ничего не найдено</p>
 				) : (
-					filtered.map((tech) => (
-						<TechnologyCard key={tech.id} tech={tech} />
+					filtered.map((tech, index) => (
+						<TechnologyCard
+							key={`${tech.id ?? "noid"}-${index}`}
+							tech={tech}
+						/>
 					))
 				)}
 			</div>
 			
-			<ApiTechnologySearch />
+			<RemoteApiSearch onImportTechnology={addTechnology} />
 		</section>
 	);
 }

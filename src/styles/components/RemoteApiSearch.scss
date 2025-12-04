@@ -1,0 +1,130 @@
+@use "../variables" as var;
+
+.remote-api {
+	margin-top: 32px;
+	padding: 18px 20px;
+	border-radius: var.$radius-lg;
+	background: var.$color-bg-surface;
+	box-shadow: var.$shadow-soft;
+}
+
+.remote-api__title {
+	font-size: 1.2rem;
+	font-weight: 700;
+	color: var.$color-primary-dark;
+	margin-bottom: 4px;
+}
+
+.remote-api__subtitle {
+	font-size: 0.95rem;
+	color: var.$color-muted;
+	margin-bottom: 14px;
+}
+
+.remote-api__row {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+	margin-bottom: 10px;
+}
+
+.remote-api__input {
+	flex: 1;
+	padding: 10px 12px;
+	border-radius: var.$radius-md;
+	border: 1px solid var.$color-border;
+	font-size: 0.95rem;
+}
+
+.remote-api__load-btn {
+	padding: 10px 14px;
+	border-radius: var.$radius-md;
+	border: none;
+	cursor: pointer;
+	background: var.$color-primary;
+	color: #fff;
+	font-size: 0.95rem;
+	font-weight: 500;
+}
+
+.remote-api__message {
+	margin-top: 8px;
+	padding: 8px 10px;
+	border-radius: var.$radius-md;
+	font-size: 0.9rem;
+}
+
+.remote-api__message--error {
+	background: #ffe5e5;
+	color: #b30000;
+}
+
+.remote-api__message--ok {
+	background: #e6f5ec;
+	color: #116133;
+}
+
+.remote-api__search-block {
+	margin-top: 18px;
+}
+
+.remote-api__hint {
+	font-size: 0.9rem;
+	color: var.$color-muted;
+	margin-bottom: 8px;
+}
+
+.remote-api__list {
+	margin-top: 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.remote-api__item {
+	padding: 12px 14px;
+	border-radius: var.$radius-md;
+	background: #ffffff;
+	box-shadow: var.$shadow-sm;
+}
+
+.remote-api__item-header {
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+	align-items: flex-start;
+	margin-bottom: 6px;
+}
+
+.remote-api__item-title {
+	font-weight: 600;
+	color: var.$color-primary-dark;
+	margin-bottom: 2px;
+}
+
+.remote-api__item-meta {
+	font-size: 0.85rem;
+	color: var.$color-muted;
+}
+
+.remote-api__item-desc {
+	font-size: 0.95rem;
+	color: var.$color-text;
+	margin-top: 4px;
+}
+
+.remote-api__import-btn {
+	padding: 6px 12px;
+	border-radius: var.$radius-md;
+	border: none;
+	cursor: pointer;
+	background: var.$color-primary;
+	color: #fff;
+	font-size: 0.9rem;
+	font-weight: 500;
+}
+
+.remote-api__empty {
+	font-size: 0.9rem;
+	color: var.$color-muted;
+}

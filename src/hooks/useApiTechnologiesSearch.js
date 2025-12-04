@@ -4,42 +4,54 @@ const API_URL = "https://jsonplaceholder.typicode.com/posts";
 
 function useApiTechnologiesSearch(query) {
 	const [items, setItems] = useState([]);
-	const [filtered, setFiltered] = useState([]);
-	const [loading, setLoading] = useState(true);
+	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
 	
 	useEffect(() => {
+		const q = query.trim().toLowerCase();
+		
+		if (!q) {
+			setItems([]);
+			setLoading(false);
+			setError("");
+			return;
+		}
+		
+		const controller = new AbortController();
+		
 		const load = async () => {
 			try {
 				setLoading(true);
 				setError("");
 				
-				const res = await fetch(API_URL);
-				if (!res.ok) throw new Error("Ошибка загрузки API");
+				const res = await fetch(API_URL, { signal: controller.signal });
+				if (!res.ok) {
+					throw new Error("Ошибка загрузки API");
+				}
 				
-				const json = await res.json();
+				const data = await res.json();
+				const filtered = (Array.isArray(data) ? data : []).filter((item) => {
+					const title = (item.title || "").toLowerCase();
+					const body = (item.body || "").toLowerCase();
+					return title.includes(q) || body.includes(q);
+				});
 				
-				setItems(json);
-			} catch (err) {
-				setError(err.message);
+				setItems(filtered);
+			} catch (e) {
+				if (e.name !== "AbortError") {
+					setError(e.message || "Ошибка загрузки данных");
+				}
 			} finally {
 				setLoading(false);
 			}
 		};
 		
 		load();
-	}, []);
+		
+		return () => controller.abort();
+	}, [query]);
 	
-	useEffect(() => {
-		const q = query.toLowerCase();
-		const result = items.filter((item) =>
-			item.title.toLowerCase().includes(q) ||
-			item.body.toLowerCase().includes(q)
-		);
-		setFiltered(result);
-	}, [query, items]);
-	
-	return { items: filtered, loading, error };
+	return { items, loading, error };
 }
 
 export default useApiTechnologiesSearch;

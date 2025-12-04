@@ -8,13 +8,24 @@ function TechnologyCard({ tech }) {
 		completed: "Завершено",
 	};
 	
+	const MAX_DESC_LENGTH = 140;
+	const fullDesc = tech.description || "";
+	const shortDesc =
+		fullDesc.length > MAX_DESC_LENGTH
+			? fullDesc.slice(0, MAX_DESC_LENGTH).trim() + "…"
+			: fullDesc;
+	
 	return (
 		<Link to={`/technologies/${tech.id}`} className="tech-card">
 			<h3 className="tech-card__title">{tech.title}</h3>
 			
-			<p className="tech-card__desc">{tech.description}</p>
+			{shortDesc && (
+				<p className="tech-card__desc">{shortDesc}</p>
+			)}
 			
-			<span className={`tech-card__status tech-card__status--${tech.status}`}>
+			<span
+				className={`tech-card__status tech-card__status--${tech.status}`}
+			>
         {statusText[tech.status] || "—"}
       </span>
 			
