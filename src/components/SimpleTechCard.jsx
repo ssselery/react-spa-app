@@ -1,123 +1,118 @@
 import { useNavigate } from "react-router-dom";
 import {
-	Card,
-	CardContent,
-	CardActions,
-	Typography,
-	Button,
-	Chip,
 	Box,
+	Typography,
+	Chip,
+	Stack,
+	Paper,
+	IconButton,
+	Tooltip,
 } from "@mui/material";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
-function getStatusColor(status) {
+function getStatusConfig(status) {
 	switch (status) {
 		case "completed":
-			return "success";
+			return { label: "Завершено", color: "success" };
 		case "in-progress":
-			return "warning";
+			return { label: "В процессе", color: "warning" };
 		default:
-			return "default";
+			return { label: "Не начато", color: "default" };
 	}
 }
 
-function getStatusText(status) {
-	switch (status) {
-		case "completed":
-			return "Завершено";
-		case "in-progress":
-			return "В процессе";
-		default:
-			return "Не начато";
-	}
+function getNextStatus(current) {
+	if (current === "not-started") return "in-progress";
+	if (current === "in-progress") return "completed";
+	return "not-started";
 }
 
-function SimpleTechCard({ technology, onStatusChange }) {
+export default function SimpleTechCard({ technology, onStatusChange }) {
 	const navigate = useNavigate();
+	const statusCfg = getStatusConfig(technology.status);
+	
+	const handleStatusClick = () => {
+		const next = getNextStatus(technology.status);
+		onStatusChange(technology.id, next);
+	};
 	
 	return (
-		<Card
+		<Paper
+			elevation={0}
 			sx={{
-				height: "100%",
+				p: 2.5,
+				borderRadius: "12px",
+				border: "1px solid #e5e5e5",
+				transition: "0.2s",
 				display: "flex",
 				flexDirection: "column",
-				justifyContent: "space-between",
+				gap: 2,
+				"&:hover": {
+					borderColor: "#d0d0d0",
+					boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
+				},
 			}}
 		>
-			<CardContent>
-				<Typography variant="h6" component="h3" gutterBottom noWrap>
+			{/* header: title + иконка Подробнее */}
+			<Stack
+				direction="row"
+				justifyContent="space-between"
+				alignItems="flex-start"
+			>
+				<Typography
+					variant="h6"
+					sx={{ fontWeight: 600, letterSpacing: "-0.2px" }}
+				>
 					{technology.title}
 				</Typography>
 				
-				<Typography
-					variant="body2"
-					color="text.secondary"
-					sx={{
-						mb: 2,
-						display: "-webkit-box",
-						WebkitLineClamp: 3,
-						WebkitBoxOrient: "vertical",
-						overflow: "hidden",
-					}}
-				>
-					{technology.description || "Описание не указано."}
-				</Typography>
-				
-				<Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-					{technology.category && (
-						<Chip
-							label={technology.category}
-							variant="outlined"
-							size="small"
-						/>
-					)}
-					<Chip
-						label={getStatusText(technology.status)}
-						color={getStatusColor(technology.status)}
+				<Tooltip title="Подробнее">
+					<IconButton
 						size="small"
-					/>
-				</Box>
-			</CardContent>
-			
-			<CardActions sx={{ px: 2, pb: 2 }}>
-				<Button
-					size="small"
-					variant="text"
-					onClick={() => navigate(`/technologies/${technology.id}`)}
-				>
-					Подробнее
-				</Button>
-				
-				{technology.status !== "completed" && (
-					<Button
-						size="small"
-						variant="contained"
-						onClick={() =>
-							onStatusChange(technology.id, "completed")
-						}
+						onClick={() => navigate(`/technologies/${technology.id}`)}
 					>
-						Завершить
-					</Button>
+						<ArrowForwardIcon fontSize="small" />
+					</IconButton>
+				</Tooltip>
+			</Stack>
+			
+			{/* описание */}
+			<Typography
+				variant="body2"
+				color="text.secondary"
+				sx={{
+					display: "-webkit-box",
+					WebkitLineClamp: 3,
+					WebkitBoxOrient: "vertical",
+					overflow: "hidden",
+				}}
+			>
+				{technology.description || "Описание отсутствует."}
+			</Typography>
+			
+			{/* чипы, прибиты вниз */}
+			<Stack
+				direction="row"
+				spacing={1}
+				flexWrap="wrap"
+				sx={{ mt: "auto" }} // <-- прибиваем блок вниз
+			>
+				{technology.category && (
+					<Chip size="small" variant="outlined" label={technology.category} />
 				)}
 				
-				<Button
+				<Chip
+					label={statusCfg.label}
+					color={statusCfg.color}
+					onClick={handleStatusClick}
 					size="small"
-					variant="outlined"
-					onClick={() =>
-						onStatusChange(
-							technology.id,
-							technology.status === "in-progress"
-								? "not-started"
-								: "in-progress"
-						)
-					}
-				>
-					{technology.status === "in-progress"
-						? "Приостановить"
-						: "Начать"}
-				</Button>
-			</CardActions>
-		</Card>
+					sx={{
+						cursor: "pointer",
+						userSelect: "none",
+						"&:hover": { opacity: 0.85 },
+					}}
+				/>
+			</Stack>
+		</Paper>
 	);
 }
-
-export default SimpleTechCard;

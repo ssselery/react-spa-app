@@ -17,6 +17,7 @@ export function AuthProvider({ children }) {
 			localStorage.setItem("user", JSON.stringify(user));
 		} else {
 			localStorage.removeItem("user");
+			localStorage.setItem("technologies_guest", JSON.stringify([]));
 		}
 	}, [user]);
 	
@@ -26,6 +27,7 @@ export function AuthProvider({ children }) {
 	
 	const logout = () => {
 		setUser(null);
+		localStorage.setItem("technologies_guest", JSON.stringify([]));
 	};
 	
 	return (

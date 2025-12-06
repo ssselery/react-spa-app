@@ -1,100 +1,172 @@
 import { useParams, useNavigate } from "react-router-dom";
+import {
+	Box,
+	Typography,
+	Paper,
+	Button,
+	Chip,
+	Stack,
+	Divider,
+	TextField,
+	Link as MuiLink,
+	useTheme,
+} from "@mui/material";
 import useTechnologies from "../hooks/useTechnologies";
 
-function TechnologyDetail() {
+export default function TechnologyDetail() {
 	const { id } = useParams();
-	const { getTechnologyById, updateStatus, updateNotes } = useTechnologies();
 	const navigate = useNavigate();
+	const theme = useTheme();
 	
+	const { getTechnologyById, updateStatus, updateNotes } = useTechnologies();
 	const tech = getTechnologyById(id);
 	
 	if (!tech) {
 		return (
-			<div className="tech-detail__wrapper">
-				<div className="tech-detail tech-detail--notfound">
-					<h1>Технология не найдена</h1>
-				</div>
-			</div>
+			<Box sx={{ py: 6, textAlign: "center" }}>
+				<Typography variant="h4" sx={{ mb: 2 }}>
+					Технология не найдена
+				</Typography>
+				
+				<Button variant="outlined" onClick={() => navigate(-1)}>
+					Вернуться назад
+				</Button>
+			</Box>
 		);
 	}
 	
+	// цвета статусов
+	const STATUS_STYLES = {
+		"not-started": { label: "Не начато", color: "default" },
+		"in-progress": { label: "В процессе", color: "warning" },
+		completed: { label: "Завершено", color: "success" },
+	};
+	
 	return (
-		<div className="tech-detail__wrapper">
-			<div className="tech-detail">
-				<button className="tech-detail__back" onClick={() => navigate(-1)}>
+		<Box sx={{ py: 4, display: "flex", justifyContent: "center" }}>
+			<Paper
+				variant="outlined"
+				sx={{
+					width: "100%",
+					maxWidth: 900,
+					p: 4,
+					borderRadius: 3,
+					bgcolor: "background.paper",
+				}}
+			>
+				{/* КНОПКА НАЗАД */}
+				<Button
+					variant="text"
+					onClick={() => navigate(-1)}
+					sx={{ mb: 2, textTransform: "none" }}
+				>
 					← Назад
-				</button>
+				</Button>
 				
-				<div className="tech-detail__header">
-					<h1 className="tech-detail__title">{tech.title}</h1>
-					<span className="tech-detail__badge">ID: {tech.id}</span>
-				</div>
-				
-				<p className="tech-detail__desc">{tech.description}</p>
-				
-				<div className="tech-detail__status-block">
-					<button
-						className={`status-btn ${
-							tech.status === "not-started" ? "active" : ""
-						}`}
-						onClick={() => updateStatus(id, "not-started")}
+				{/* ЗАГОЛОВОК */}
+				<Box sx={{ mb: 2 }}>
+					<Typography variant="h4" sx={{ fontWeight: 700 }}>
+						{tech.title}
+					</Typography>
+					
+					<Typography
+						variant="caption"
+						sx={{ color: "text.secondary", mt: 1, display: "block" }}
 					>
-						Не начато
-					</button>
-					
-					<button
-						className={`status-btn ${
-							tech.status === "in-progress" ? "active" : ""
-						}`}
-						onClick={() => updateStatus(id, "in-progress")}
-					>
-						В процессе
-					</button>
-					
-					<button
-						className={`status-btn ${
-							tech.status === "completed" ? "active" : ""
-						}`}
-						onClick={() => updateStatus(id, "completed")}
-					>
-						Завершено
-					</button>
-				</div>
+						ID: {tech.id}
+					</Typography>
+				</Box>
 				
-				<div className="tech-detail__info">
-					<div className="tech-detail__row">
-						<span className="label">Категория:</span>
-						<span>{tech.category || "—"}</span>
-					</div>
-					
-					<div className="tech-detail__row">
-						<span className="label">Источник:</span>
-						{tech.source ? (
-							<a href={tech.source} target="_blank" rel="noreferrer">
-								{tech.source}
-							</a>
-						) : (
-							"—"
-						)}
-					</div>
-					
-					<div className="tech-detail__row">
-						<span className="label">Дата:</span>
-						<span>{tech.createdAt}</span>
-					</div>
-					
-					<div className="tech-detail__notes-block">
-						<h3>Заметки</h3>
-						<textarea
-							placeholder="Добавьте заметку…"
-							value={tech.notes || ""}
-							onChange={(e) => updateNotes(id, e.target.value)}
+				<Typography variant="body1" sx={{ mb: 3, color: "text.secondary" }}>
+					{tech.description}
+				</Typography>
+				
+				<Divider sx={{ my: 3 }} />
+				
+				{/* СТАТУСЫ */}
+				<Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+					Статус
+				</Typography>
+				
+				<Stack direction="row" spacing={1} sx={{ mb: 3 }}>
+					{Object.entries(STATUS_STYLES).map(([key, s]) => (
+						<Chip
+							key={key}
+							label={s.label}
+							color={key === tech.status ? s.color : "default"}
+							variant={key === tech.status ? "filled" : "outlined"}
+							onClick={() => updateStatus(id, key)}
+							sx={{
+								cursor: "pointer",
+								fontWeight: key === tech.status ? 600 : 400,
+							}}
 						/>
-					</div>
-				</div>
-			</div>
-		</div>
+					))}
+				</Stack>
+				
+				<Divider sx={{ my: 3 }} />
+				
+				{/* ИНФОРМАЦИЯ */}
+				<Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+					Информация
+				</Typography>
+				
+				<Stack spacing={1.5} sx={{ mb: 3 }}>
+					<Box>
+						<Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+							Категория:
+						</Typography>
+						<Typography variant="body2">{tech.category || "—"}</Typography>
+					</Box>
+					
+					<Box>
+						<Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+							Источник:
+						</Typography>
+						{tech.source ? (
+							<MuiLink
+								href={tech.source}
+								target="_blank"
+								rel="noopener"
+								sx={{ fontSize: "0.9rem" }}
+							>
+								{tech.source}
+							</MuiLink>
+						) : (
+							<Typography variant="body2">—</Typography>
+						)}
+					</Box>
+					
+					<Box>
+						<Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+							Дата добавления:
+						</Typography>
+						<Typography variant="body2">{tech.createdAt || "—"}</Typography>
+					</Box>
+				</Stack>
+				
+				<Divider sx={{ my: 3 }} />
+				
+				{/* ЗАМЕТКИ */}
+				<Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+					Заметки
+				</Typography>
+				
+				<TextField
+					multiline
+					minRows={4}
+					fullWidth
+					placeholder="Добавьте заметку…"
+					value={tech.notes || ""}
+					onChange={(e) => updateNotes(id, e.target.value)}
+					sx={{
+						borderRadius: 2,
+						"& .MuiOutlinedInput-root": {
+							borderRadius: "12px",
+						},
+					}}
+				/>
+			</Paper>
+		</Box>
 	);
 }
-
-export default TechnologyDetail;

@@ -1,21 +1,40 @@
+import {
+	Box,
+	Typography,
+	Paper,
+	TextField,
+	Button,
+	MenuItem,
+	Stack,
+	IconButton,
+	Divider,
+	useTheme,
+} from "@mui/material";
+
+import DeleteIcon from "@mui/icons-material/Delete";
+import AddIcon from "@mui/icons-material/Add";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import RefreshIcon from "@mui/icons-material/Refresh";
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useNotifications } from "../context/NotificationContext";
 
 import useTechnologies from "../hooks/useTechnologies";
 import useTechnologiesApi from "../hooks/useTechnologiesApi";
 
-function AddTechnology() {
+export default function AddTechnology() {
+	const theme = useTheme();
 	const navigate = useNavigate();
 	
 	const { addTechnology, techList } = useTechnologies();
-	
 	const {
 		loading: apiLoading,
 		error: apiError,
 		refetch: refetchApi,
 		addTechnology: addTechnologyViaApi,
 	} = useTechnologiesApi();
-
+	
 	const [formData, setFormData] = useState({
 		title: "",
 		description: "",
@@ -27,36 +46,36 @@ function AddTechnology() {
 	
 	const [errors, setErrors] = useState({});
 	const [isFormValid, setIsFormValid] = useState(false);
-
+	
+	const { addNotification } = useNotifications();
+	
 	const validateForm = () => {
 		const newErrors = {};
-
-		if (!formData.title.trim()) {
-			newErrors.title = "Название обязательно";
-		} else if (formData.title.trim().length < 2) {
+		
+		// ----- Title -----
+		if (!formData.title.trim()) newErrors.title = "Название обязательно";
+		else if (formData.title.trim().length < 2)
 			newErrors.title = "Минимум 2 символа";
-		} else if (formData.title.trim().length > 50) {
+		else if (formData.title.trim().length > 50)
 			newErrors.title = "Не более 50 символов";
-		}
-
-		if (!formData.description.trim()) {
+		
+		// ----- Description -----
+		if (!formData.description.trim())
 			newErrors.description = "Описание обязательно";
-		} else if (formData.description.trim().length < 10) {
+		else if (formData.description.trim().length < 10)
 			newErrors.description = "Минимум 10 символов";
-		}
-
+		
+		// ----- Deadline -----
 		if (formData.deadline) {
-			const deadlineDate = new Date(formData.deadline);
+			const date = new Date(formData.deadline);
 			const today = new Date();
 			today.setHours(0, 0, 0, 0);
-			
-			if (deadlineDate < today) {
-				newErrors.deadline = "Дедлайн не может быть в прошлом";
-			}
+			if (date < today) newErrors.deadline = "Дата не может быть в прошлом";
 		}
-
+		
+		// ----- Resources -----
 		formData.resources.forEach((r, i) => {
-			if (r.trim() !== "") {
+			if (r.trim()) {
 				try {
 					new URL(r);
 				} catch {
@@ -71,34 +90,29 @@ function AddTechnology() {
 	
 	useEffect(() => {
 		validateForm();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [formData]);
-
+	
+	// ----- Handlers -----
 	const handleChange = (e) => {
-		const { name, value } = e.target;
-		setFormData((prev) => ({ ...prev, [name]: value }));
+		setFormData((p) => ({ ...p, [e.target.name]: e.target.value }));
 	};
 	
-	const handleResourceChange = (index, value) => {
-		const next = [...formData.resources];
-		next[index] = value;
-		setFormData((prev) => ({ ...prev, resources: next }));
+	const handleResourceChange = (i, value) => {
+		const arr = [...formData.resources];
+		arr[i] = value;
+		setFormData((p) => ({ ...p, resources: arr }));
 	};
 	
 	const addResourceField = () => {
-		setFormData((prev) => ({
-			...prev,
-			resources: [...prev.resources, ""],
-		}));
+		setFormData((p) => ({ ...p, resources: [...p.resources, ""] }));
 	};
 	
-	const removeResourceField = (index) => {
-		if (formData.resources.length > 1) {
-			setFormData((prev) => ({
-				...prev,
-				resources: prev.resources.filter((_, i) => i !== index),
-			}));
-		}
+	const removeResourceField = (i) => {
+		if (formData.resources.length === 1) return;
+		setFormData((p) => ({
+			...p,
+			resources: p.resources.filter((_, idx) => idx !== i),
+		}));
 	};
 	
 	const handleSubmitManual = (e) => {
@@ -110,19 +124,25 @@ function AddTechnology() {
 				? Math.max(...techList.map((t) => Number(t.id) || 0)) + 1
 				: 1;
 		
-		const cleanedData = {
+		addTechnology({
 			...formData,
 			id: nextId,
-			resources: formData.resources.filter((r) => r.trim() !== ""),
+			resources: formData.resources.filter((x) => x.trim() !== ""),
 			createdAt: new Date().toISOString().split("T")[0],
-			notes: "",
 			status: "not-started",
-		};
+			notes: "",
+		});
 		
-		addTechnology(cleanedData);
+		addNotification(
+			"Технология добавлена",
+			`Вы добавили технологию: ${formData.title}`
+		);
+		
+		
 		navigate("/technologies");
 	};
-
+	
+	// ===== API IMPORT =====
 	const [importUrl, setImportUrl] = useState(
 		"https://raw.githubusercontent.com/ssselery/react-spa-app/refs/heads/main/ApiTest/roadmap-frontend.json"
 	);
@@ -131,28 +151,23 @@ function AddTechnology() {
 	
 	const handleImportRoadmap = async (e) => {
 		e.preventDefault();
-		if (!importUrl.trim()) return;
-		
 		try {
 			setImporting(true);
 			setImportMessage("");
 			
-			const response = await fetch(importUrl.trim());
-			if (!response.ok) {
-				throw new Error(`Ошибка HTTP ${response.status}`);
-			}
+			const res = await fetch(importUrl.trim());
+			if (!res.ok) throw new Error("Ошибка HTTP " + res.status);
 			
-			const data = await response.json();
-			
+			const data = await res.json();
 			const arr = Array.isArray(data)
 				? data
 				: Array.isArray(data.technologies)
 					? data.technologies
 					: null;
 			
-			if (!arr) throw new Error("Неверный формат данных");
+			if (!arr) throw new Error("Неверный формат JSON");
 			
-			let currentMaxId =
+			let maxId =
 				techList.length > 0
 					? Math.max(...techList.map((t) => Number(t.id) || 0))
 					: 0;
@@ -160,245 +175,255 @@ function AddTechnology() {
 			let count = 0;
 			
 			for (const item of arr) {
-				currentMaxId += 1;
+				maxId += 1;
 				
-				await addTechnologyViaApi(item); // чтобы соблюсти тз по API
+				await addTechnologyViaApi(item);
 				
 				addTechnology({
-					id: currentMaxId,
+					id: maxId,
 					title: item.title || "Без названия",
 					description: item.description || "",
 					category: item.category || "",
 					createdAt: new Date().toISOString().split("T")[0],
 					notes: "",
+					status: "not-started",
 					source:
 						Array.isArray(item.resources) && item.resources[0]
 							? item.resources[0]
 							: "",
-					status: "not-started",
 				});
 				
-				count += 1;
+				count++;
 			}
 			
-			setImportMessage(`Импортировано: ${count}`);
+			const msg = `Импортировано: ${count}`;
+			setImportMessage(msg);
+			
+			addNotification("Импорт дорожной карты", msg);
 		} catch (err) {
-			setImportMessage("Ошибка импорта: " + err.message);
+			const msg = "Ошибка импорта: " + err.message;
+			setImportMessage(msg);
+			
+			addNotification("Ошибка импорта дорожной карты", msg);
 		} finally {
 			setImporting(false);
 		}
 	};
 	
 	return (
-		<section className="page add-page">
-			<h1 className="page-title">Добавить технологию</h1>
-			
-			<div className="add-layout">
-				<form className="add-card add-card--manual" onSubmit={handleSubmitManual}>
-					<h2 className="add-card__title">Ручное добавление</h2>
-					<p className="add-card__subtitle notice-required">
-						<span className="asterisk">*</span> обязательные поля формы
-					</p>
-
-					<div
-						role="status"
-						aria-live="polite"
-						aria-atomic="true"
-						className="sr-only"
-					>
-						{!isFormValid && "Форма содержит ошибки"}
-					</div>
-
-					<div className="form-group">
-						<label htmlFor="title" className="required">
-							Название *
-						</label>
-						<input
-							id="title"
-							name="title"
-							value={formData.title}
-							onChange={handleChange}
-							aria-required="true"
-							aria-invalid={!!errors.title}
-							aria-describedby={errors.title ? "title-error" : undefined}
-							className={errors.title ? "error" : ""}
-							placeholder="React, Node.js, TypeScript..."
-						/>
-						{errors.title && (
-							<span id="title-error" role="alert" className="error-message">
-								{errors.title}
-							</span>
-						)}
-					</div>
-
-					<div className="form-group">
-						<label htmlFor="description" className="required">
-							Описание *
-						</label>
-						<textarea
-							id="description"
-							name="description"
-							rows="3"
-							value={formData.description}
-							onChange={handleChange}
-							aria-required="true"
-							aria-invalid={!!errors.description}
-							aria-describedby={errors.description ? "desc-error" : undefined}
-							className={errors.description ? "error" : ""}
-							placeholder="Опишите, что это за технология и зачем её изучать..."
-						/>
-						{errors.description && (
-							<span id="desc-error" role="alert" className="error-message">
-								{errors.description}
-							</span>
-						)}
-					</div>
-
-					<div className="form-group">
-						<label htmlFor="category">Категория</label>
-						<select
-							id="category"
-							name="category"
-							value={formData.category}
-							onChange={handleChange}
-						>
-							<option value="frontend">Frontend</option>
-							<option value="backend">Backend</option>
-							<option value="database">Database</option>
-							<option value="devops">DevOps</option>
-							<option value="other">Другое</option>
-						</select>
-					</div>
-
-					<div className="form-group">
-						<label htmlFor="difficulty">Сложность</label>
-						<select
-							id="difficulty"
-							name="difficulty"
-							value={formData.difficulty}
-							onChange={handleChange}
-						>
-							<option value="beginner">Начальный</option>
-							<option value="intermediate">Средний</option>
-							<option value="advanced">Продвинутый</option>
-						</select>
-					</div>
-
-					<div className="form-group">
-						<label htmlFor="deadline">Дедлайн</label>
-						<input
-							id="deadline"
-							type="date"
-							name="deadline"
-							value={formData.deadline}
-							onChange={handleChange}
-							aria-invalid={!!errors.deadline}
-							aria-describedby={errors.deadline ? "deadline-error" : undefined}
-							className={errors.deadline ? "error" : ""}
-						/>
-						{errors.deadline && (
-							<span id="deadline-error" role="alert" className="error-message">
-								{errors.deadline}
-							</span>
-						)}
-					</div>
-
-					<div className="form-group">
-						<label>Ресурсы</label>
-						{formData.resources.map((r, i) => (
-							<div key={i} className="resource-field">
-								<input
-									type="url"
-									value={r}
-									onChange={(e) => handleResourceChange(i, e.target.value)}
-									aria-invalid={!!errors[`resource_${i}`]}
-									aria-describedby={
-										errors[`resource_${i}`] ? `reserr-${i}` : undefined
-									}
-									className={errors[`resource_${i}`] ? "error" : ""}
-									placeholder="https://example.com"
-								/>
-								{formData.resources.length > 1 && (
-									<button
-										type="button"
-										onClick={() => removeResourceField(i)}
-										className="btn-remove"
-									>
-										Удалить
-									</button>
-								)}
-								{errors[`resource_${i}`] && (
-									<span
-										id={`reserr-${i}`}
-										role="alert"
-										className="error-message"
-									>
-										{errors[`resource_${i}`]}
-									</span>
-								)}
-							</div>
-						))}
+		<Box sx={{ py: 4, display: "flex", justifyContent: "center" }}>
+			<Box sx={{ width: "100%", maxWidth: 1100 }}>
+				<Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
+					Добавить технологию
+				</Typography>
+				
+				<Box
+					sx={{
+						display: "grid",
+						gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+						gap: 3,
+					}}
+				>
+					{/* ------------------ ЛЕВАЯ КАРТА: РУЧНОЕ ДОБАВЛЕНИЕ ------------------ */}
+					<Paper sx={{ p: 3, borderRadius: 3 }} variant="outlined">
+						<Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+							Ручное добавление
+						</Typography>
+						<Typography sx={{ mb: 3, color: "text.secondary" }}>
+							Поля отмеченные * обязательны.
+						</Typography>
 						
-						<button
-							type="button"
-							onClick={addResourceField}
-							className="btn-add-resource"
-						>
-							+ Добавить ресурс
-						</button>
-					</div>
+						<form onSubmit={handleSubmitManual}>
+							<Stack spacing={2}>
+								<TextField
+									label="Название *"
+									name="title"
+									value={formData.title}
+									onChange={handleChange}
+									error={!!errors.title}
+									helperText={errors.title}
+								/>
+								
+								<TextField
+									label="Описание *"
+									name="description"
+									multiline
+									minRows={3}
+									value={formData.description}
+									onChange={handleChange}
+									error={!!errors.description}
+									helperText={errors.description}
+								/>
+								
+								<TextField
+									label="Категория"
+									name="category"
+									select
+									value={formData.category}
+									onChange={handleChange}
+								>
+									<MenuItem value="frontend">Frontend</MenuItem>
+									<MenuItem value="backend">Backend</MenuItem>
+									<MenuItem value="database">Database</MenuItem>
+									<MenuItem value="devops">DevOps</MenuItem>
+									<MenuItem value="other">Другое</MenuItem>
+								</TextField>
+								
+								<TextField
+									label="Сложность"
+									name="difficulty"
+									select
+									value={formData.difficulty}
+									onChange={handleChange}
+								>
+									<MenuItem value="beginner">Начальный</MenuItem>
+									<MenuItem value="intermediate">Средний</MenuItem>
+									<MenuItem value="advanced">Продвинутый</MenuItem>
+								</TextField>
+								
+								<TextField
+									label="Дедлайн"
+									type="date"
+									name="deadline"
+									value={formData.deadline}
+									onChange={handleChange}
+									error={!!errors.deadline}
+									helperText={errors.deadline}
+									InputLabelProps={{ shrink: true }}
+								/>
+								
+								{/* РЕСУРСЫ */}
+								<Box>
+									<Typography sx={{ mb: 1 }}>Ресурсы</Typography>
+									<Stack spacing={1.5}>
+										{formData.resources.map((r, i) => (
+											<Box
+												key={i}
+												sx={{
+													display: "flex",
+													gap: 1,
+													alignItems: "center",
+												}}
+											>
+												<TextField
+													fullWidth
+													value={r}
+													onChange={(e) =>
+														handleResourceChange(i, e.target.value)
+													}
+													error={!!errors[`resource_${i}`]}
+													helperText={errors[`resource_${i}`]}
+													placeholder="https://example.com"
+												/>
+												
+												{formData.resources.length > 1 && (
+													<IconButton onClick={() => removeResourceField(i)}>
+														<DeleteIcon />
+													</IconButton>
+												)}
+											</Box>
+										))}
+									</Stack>
+									
+									<Button
+										startIcon={<AddIcon />}
+										sx={{ mt: 1, textTransform: "none" }}
+										onClick={addResourceField}
+									>
+										Добавить ресурс
+									</Button>
+								</Box>
+								
+								<Button
+									type="submit"
+									variant="contained"
+									disabled={!isFormValid}
+									sx={{
+										textTransform: "none",
+										borderRadius: 2,
+										py: 1,
+									}}
+								>
+									Добавить
+								</Button>
+							</Stack>
+						</form>
+					</Paper>
 					
-					<button type="submit" className="add-btn" disabled={!isFormValid}>
-						Добавить
-					</button>
-				</form>
-
-				<div className="add-card add-card--import">
-					<h2 className="add-card__title">Импорт дорожной карты</h2>
-					<p className="add-card__subtitle">
-						Подключите JSON с GitHub или другого API и импортируйте технологии.
-					</p>
-					
-					<form className="add-import__form" onSubmit={handleImportRoadmap}>
-						<div className="form-group">
-							<label htmlFor="import-url">URL API</label>
-							<input
-								id="import-url"
-								type="text"
+					{/* ------------------ ПРАВАЯ КАРТА: ИМПОРТ API ------------------ */}
+					<Paper sx={{ p: 3, borderRadius: 3 }} variant="outlined">
+						<Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+							Импорт дорожной карты
+						</Typography>
+						
+						<Typography sx={{ mb: 2, color: "text.secondary" }}>
+							Введите URL JSON-файла.
+						</Typography>
+						
+						<Stack spacing={2}>
+							<TextField
+								label="URL API"
 								value={importUrl}
 								onChange={(e) => setImportUrl(e.target.value)}
-								placeholder="https://..."
 							/>
-						</div>
-						
-						<div className="add-import__actions">
-							<button
-								type="submit"
-								disabled={importing}
-								className="add-btn add-btn--secondary"
-							>
-								{importing ? "Импорт..." : "Импортировать"}
-							</button>
 							
-							<button
-								type="button"
-								className="add-btn add-btn--ghost"
-								disabled={apiLoading}
-								onClick={refetchApi}
-							>
-								Обновить API
-							</button>
-						</div>
-					</form>
-					
-					{/* --- ЛОКАЛЬНЫЙ ИМПОРТ / ЭКСПОРТ JSON --- */}
-					<div className="local-io">
-						<h3 className="local-io__title">Локальный импорт / экспорт</h3>
+							<Stack direction="row" spacing={1}>
+								<Button
+									variant="contained"
+									startIcon={<CloudUploadIcon />}
+									onClick={handleImportRoadmap}
+									disabled={importing}
+									sx={{ textTransform: "none", borderRadius: 2 }}
+								>
+									{importing ? "Импорт…" : "Импортировать"}
+								</Button>
+								
+								<Button
+									variant="outlined"
+									startIcon={<RefreshIcon />}
+									onClick={refetchApi}
+									disabled={apiLoading}
+									sx={{ textTransform: "none", borderRadius: 2 }}
+								>
+									Обновить API
+								</Button>
+							</Stack>
+							
+							{importMessage && (
+								<Typography
+									sx={{
+										color: importMessage.startsWith("Ошибка")
+											? theme.palette.error.main
+											: theme.palette.success.main,
+									}}
+								>
+									{importMessage}
+								</Typography>
+							)}
+							
+							{apiError && (
+								<Typography sx={{ color: theme.palette.error.main }}>
+									{apiError}
+								</Typography>
+							)}
+						</Stack>
 						
-						<div className="local-io__buttons">
-							<label className="file-input-label">
+						<Divider sx={{ my: 3 }} />
+						
+						{/* ------------------ ЛОКАЛЬНЫЙ ИМПОРТ/ЭКСПОРТ JSON ------------------ */}
+						<Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
+							Локальный импорт / экспорт
+						</Typography>
+						
+						<Stack spacing={2}>
+							<Button
+								variant="outlined"
+								component="label"
+								sx={{ textTransform: "none", borderRadius: 2 }}
+							>
 								Импортировать JSON
 								<input
+									hidden
 									type="file"
 									accept=".json"
 									onChange={(e) => {
@@ -411,93 +436,72 @@ function AddTechnology() {
 												const data = JSON.parse(ev.target.result);
 												
 												if (!Array.isArray(data)) {
-													alert("Ошибка: JSON должен содержать массив технологий");
+													alert("JSON должен содержать массив объектов");
 													return;
 												}
 												
-												let currentMaxId =
+												let maxId =
 													techList.length > 0
 														? Math.max(...techList.map((t) => Number(t.id) || 0))
 														: 0;
 												
-												let importedCount = 0;
+												let count = 0;
 												
 												data.forEach((item) => {
-													currentMaxId++;
+													maxId++;
 													
 													addTechnology({
-														id: currentMaxId,
+														id: maxId,
 														title: item.title || "Без названия",
 														description: item.description || "",
 														category: item.category || "",
-														createdAt: new Date().toISOString().split("T")[0],
+														createdAt: new Date()
+															.toISOString()
+															.split("T")[0],
+														status: "not-started",
 														notes: "",
 														source: item.source || "",
-														status: "not-started",
 													});
 													
-													importedCount++;
+													count++;
 												});
 												
-												alert(`Импортировано технологий: ${importedCount}`);
+												alert(`Импортировано: ${count}`);
 											} catch {
-												alert("Ошибка чтения JSON-файла");
+												alert("Ошибка чтения JSON");
 											}
 										};
 										
 										reader.readAsText(file);
 										e.target.value = "";
 									}}
-									style={{ display: "none" }}
 								/>
-							</label>
+							</Button>
 							
-							<button
-								className="add-btn add-btn--ghost"
+							<Button
+								variant="outlined"
+								sx={{ textTransform: "none", borderRadius: 2 }}
 								onClick={() => {
 									const json = JSON.stringify(techList, null, 2);
-									const blob = new Blob([json], { type: "application/json" });
+									const blob = new Blob([json], {
+										type: "application/json",
+									});
 									const url = URL.createObjectURL(blob);
 									
 									const a = document.createElement("a");
 									a.href = url;
 									a.download = "technologies_export.json";
 									a.click();
+									
 									URL.revokeObjectURL(url);
 								}}
 							>
 								Экспортировать JSON
-							</button>
-						</div>
-					</div>
-					
-					
-					{importMessage && (
-						<div
-							className={
-								importMessage.startsWith("Ошибка")
-									? "add-import__message add-import__message--error"
-									: "add-import__message add-import__message--success"
-							}
-						>
-							{importMessage}
-						</div>
-					)}
-					
-					
-					
-					{apiError && !importMessage && (
-						<div className="add-import__message add-import__message--error">
-							{apiError}
-						</div>
-					)}
-				</div>
-				
-				
-				
-			</div>
-		</section>
+							</Button>
+						</Stack>
+					</Paper>
+				</Box>
+			</Box>
+		</Box>
 	);
 }
-
-export default AddTechnology;

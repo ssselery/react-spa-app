@@ -46,10 +46,11 @@ function useTechnologies() {
 	const [techList, setTechList] = useLocalStorage(storageKey, defaultTechnologies);
 	
 	useEffect(() => {
-		if (!user && (!techList || techList.length === 0)) {
+		if (!user) {
 			setTechList(defaultTechnologies);
 		}
-	}, [user, techList, setTechList]);
+	}, [user]);
+	
 	
 	const addTechnology = (techData) => {
 		const nextId =

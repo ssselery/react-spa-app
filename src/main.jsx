@@ -2,28 +2,35 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 
-import { ThemeProvider, CssBaseline } from "@mui/material";
-
 import App from "./App.jsx";
+import { NotificationProvider } from "./context/NotificationContext";
 import { AuthProvider } from "./context/AuthContext";
+import { ColorModeProvider } from "./context/ThemeModeContext";
 
 import "@a1rth/css-normalize";
 
-import createAppTheme from "./theme/muiTheme";
-
-const theme = createAppTheme("light");
-
 ReactDOM.createRoot(document.getElementById("root")).render(
 	<React.StrictMode>
-		<ThemeProvider theme={theme}>
-			<CssBaseline />
-			
-			<BrowserRouter basename = "/react-spa-app/">
+		<ColorModeProvider>
+			<BrowserRouter basename="/react-spa-app/">
+				
 				<AuthProvider>
-					<App />
+					<NotificationProvider>
+						<App />
+					</NotificationProvider>
 				</AuthProvider>
+			
 			</BrowserRouter>
-		
-		</ThemeProvider>
+		</ColorModeProvider>
 	</React.StrictMode>
 );
+
+
+
+
+
+
+
+
+
+
