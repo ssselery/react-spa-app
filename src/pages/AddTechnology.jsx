@@ -4,9 +4,6 @@ import { useNavigate } from "react-router-dom";
 import useTechnologies from "../hooks/useTechnologies";
 import useTechnologiesApi from "../hooks/useTechnologiesApi";
 
-import "../styles/components/PageLayout.scss";
-import "../styles/components/AddTechnology.scss";
-
 function AddTechnology() {
 	const navigate = useNavigate();
 	

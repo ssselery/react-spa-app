@@ -1,6 +1,5 @@
 import { useState } from "react";
 import SearchDebounced from "./SearchDebounced";
-import "../styles/components/RemoteApiSearch.scss";
 
 const DEFAULT_API_URL =
 	"https://raw.githubusercontent.com/ssselery/react-spa-app/refs/heads/main/ApiTest/roadmap-frontend.json";

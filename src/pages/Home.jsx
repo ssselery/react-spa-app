@@ -1,6 +1,4 @@
 import { Link } from "react-router-dom";
-import "../styles/components/PageLayout.scss";
-import "../styles/components/Home.scss";
 
 import { useAuth } from "../context/AuthContext";
 import useTechnologies from "../hooks/useTechnologies";

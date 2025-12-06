@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import "../styles/components/TechnologyCard.scss";
 
 function TechnologyCard({ tech }) {
 	const statusText = {

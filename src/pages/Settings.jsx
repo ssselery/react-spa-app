@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import "../styles/components/Settings.scss";
 import { useAuth } from "../context/AuthContext";
 import useTechnologies from "../hooks/useTechnologies";
 

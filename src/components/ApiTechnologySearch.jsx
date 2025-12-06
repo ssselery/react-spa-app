@@ -3,8 +3,6 @@ import SearchDebounced from "./SearchDebounced";
 import useApiTechnologiesSearch from "../hooks/useApiTechnologiesSearch";
 import useTechnologies from "../hooks/useTechnologies";
 
-import "../styles/components/ApiTechnologySearch.scss";
-
 function ApiTechnologySearch() {
 	const [query, setQuery] = useState("");
 	const { items, loading, error } = useApiTechnologiesSearch(query);

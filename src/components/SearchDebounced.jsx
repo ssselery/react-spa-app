@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 
-import "../styles/components/SearchDebounced.scss";
-
 function SearchDebounced({ onSearch, delay = 400 }) {
 	const [value, setValue] = useState("");
 	

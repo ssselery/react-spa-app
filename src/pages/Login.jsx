@@ -2,9 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-import "../styles/components/Login.scss";
-import "../styles/components/PageLayout.scss";
-
 function Login() {
 	const navigate = useNavigate();
 	const { login } = useAuth();

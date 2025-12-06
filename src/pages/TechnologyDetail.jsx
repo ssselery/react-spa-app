@@ -1,8 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import useTechnologies from "../hooks/useTechnologies";
 
-import "../styles/components/TechnologyDetail.scss";
-
 function TechnologyDetail() {
 	const { id } = useParams();
 	const { getTechnologyById, updateStatus, updateNotes } = useTechnologies();
