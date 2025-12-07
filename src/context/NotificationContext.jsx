@@ -28,7 +28,7 @@ export function NotificationProvider({ children }) {
 	// Сохраняем в localStorage
 	useEffect(() => {
 		localStorage.setItem(storageKey, JSON.stringify(notifications));
-	}, [notifications]);
+	}, [notifications, storageKey]);
 	
 	// Добавление уведомления
 	const addNotification = (title, description = "", type = "info") => {
@@ -55,12 +55,25 @@ export function NotificationProvider({ children }) {
 	const markAllAsRead = () =>
 		setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
 	
+	// ✅ НОВАЯ ФУНКЦИЯ: Очистить всю историю уведомлений
+	const clearAllNotifications = () => {
+		setNotifications([]);
+		// localStorage автоматически очистится благодаря эффекту выше
+	};
+	
+	// ✅ Функция для закрытия отдельных toast
+	const removeToast = (id) => {
+		setToasts((prev) => prev.filter((t) => t.id !== id));
+	};
+	
 	return (
 		<NotificationContext.Provider value={{
 			notifications,
 			toasts,
 			addNotification,
-			markAllAsRead
+			markAllAsRead,
+			clearAllNotifications, // ✅ Добавляем новую функцию
+			removeToast, // ✅ Добавляем функцию для удаления toast
 		}}>
 			{children}
 		</NotificationContext.Provider>
